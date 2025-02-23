@@ -1,4 +1,4 @@
-import os
+import os, re
 from dataclasses import dataclass
 
 import torch
@@ -26,38 +26,14 @@ class ForestDataset(Dataset):
             self.images = self.images[:limit]
             self.labels = self.labels[:limit]
 
-    @classmethod
-    def line_to_bbox(self, line):
-        """
-        Converts a line of normalized coordinates
-        to a bounding box.
-        """
-        parts = list(map(float, line.strip().split()))
-        coords = parts[1:]
-        x_coords = coords[0::2]
-        y_coords = coords[1::2]
-
-        # Convert polygon to bounding box
-        xmin = min(x_coords) * self.IMAGE_SIZE
-        ymin = min(y_coords) * self.IMAGE_SIZE
-        xmax = max(x_coords) * self.IMAGE_SIZE
-        ymax = max(y_coords) * self.IMAGE_SIZE
-        
-        height = ymax - ymin
-        width = xmax - xmin
-
-        if height <= 0 or width <= 0:
-            print('Invalid bbox, Skipping: ', line)
-            return None, None
-
-        area = height * width
-
-        return [xmin, ymin, xmax, ymax], area
-
     def __getitem__(self, index):
         image_path = os.path.join(self.root, 'images', self.images[index])
         label_path = os.path.join(self.root, 'labels', self.labels[index])
         image = read_image(image_path)
+        
+        image_id_matcher = re.search(r'\d+', image_path)
+        image_id = int(image_id_matcher.group()) if image_id_matcher else index
+        print('ID is', image_id, image_path)
 
         with open(label_path, 'r') as f:
             lines = f.readlines()
@@ -65,17 +41,23 @@ class ForestDataset(Dataset):
             areas = []
 
             for line in lines:
-                bbox, area = self.line_to_bbox(line)
-                if bbox != None:
-                    bboxes.append(bbox)
-                    areas.append(area)
+                bbox = list(map(float, line.strip().split()))
+                height = bbox[3] - bbox[1]
+                width = bbox[2] - bbox[0]
+                area = height * width
+
+                bboxes.append(bbox)
+                areas.append(area)
 
             num_bboxes = len(bboxes)
+
+            if num_bboxes == 0:
+                raise ValueError("No Bounding Boxes Returned") 
 
             bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
             labels = torch.as_tensor([1] * num_bboxes, dtype=torch.int64)
             is_crowd = torch.zeros((num_bboxes), dtype=torch.int64) 
-            image_id = torch.tensor([index]) 
+            image_id = torch.tensor(image_id, dtype=torch.int64) 
             areas = torch.as_tensor(areas, dtype=torch.float32)
 
             target = {
@@ -117,7 +99,8 @@ def load_dataset(dataset_root_path, limit=None) -> DataLoader:
 
     valid = DataLoader(
         ForestDataset(os.path.join(dataset_root_path, 'valid'), 
-                      get_transform(train=False)),
+                      get_transform(train=False),
+                      limit),
         batch_size=1,
         shuffle=True,
         collate_fn=utils.collate_fn
@@ -125,7 +108,8 @@ def load_dataset(dataset_root_path, limit=None) -> DataLoader:
 
     test = DataLoader(
         ForestDataset(os.path.join(dataset_root_path, 'test'), 
-                      get_transform(train=False)),
+                      get_transform(train=False),
+                      limit),
         batch_size=1,
         shuffle=False,
         collate_fn=utils.collate_fn

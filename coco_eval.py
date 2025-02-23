@@ -1,4 +1,4 @@
-import copy
+import copy, json
 import io
 from contextlib import redirect_stdout
 
@@ -31,7 +31,9 @@ class CocoEvaluator:
 
         for iou_type in self.iou_types:
             results = self.prepare(predictions, iou_type)
+
             with redirect_stdout(io.StringIO()):
+                print(results)
                 coco_dt = COCO.loadRes(self.coco_gt, results) if results else COCO()
             coco_eval = self.coco_eval[iou_type]
 
@@ -96,25 +98,27 @@ class CocoEvaluator:
 
             scores = prediction["scores"]
             labels = prediction["labels"]
-            masks = prediction["masks"]
+            # masks = prediction["masks"]
 
-            masks = masks > 0.5
+            # masks = masks > 0.5
 
             scores = prediction["scores"].tolist()
             labels = prediction["labels"].tolist()
 
+            """
             rles = [
                 mask_util.encode(np.array(mask[0, :, :, np.newaxis], dtype=np.uint8, order="F"))[0] for mask in masks
             ]
             for rle in rles:
                 rle["counts"] = rle["counts"].decode("utf-8")
+            """
 
             coco_results.extend(
                 [
                     {
                         "image_id": original_id,
                         "category_id": labels[k],
-                        "segmentation": rle,
+                        "segmentation": None,
                         "score": scores[k],
                     }
                     for k, rle in enumerate(rles)

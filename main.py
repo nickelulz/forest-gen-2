@@ -10,7 +10,7 @@ def main() -> None:
     device = set_device()
     dataset = load_dataset('./data/forest', limit=10)
     print(len(dataset.train.dataset.labels))
-    model = get_model_instance_segmentation(num_classes = 2)
+    model = get_model_object_detection(num_classes = 2)
     train_model(model, dataset, device, num_epochs=2)
     # torch.save(model.state_dict(), 'forest-stand-gen.pth')
     # test_model(model, "data/forest/test/images/stand_1809.png")
