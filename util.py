@@ -38,10 +38,13 @@ def get_transform(train):
     return T.Compose(transforms)
 
 def set_device():
+    device = None
     if torch.cuda.is_available():
-        return torch.device('cuda') 
+        device = torch.device('cuda') 
     else: 
-        return torch.device('cpu')
+        device = torch.device('cpu')
+
+    print(f'Using Device: {device}')
 
 def visualize_bboxes(folder_path, num_images=5, img_size=640):
     """
@@ -110,7 +113,7 @@ def visualize_bboxes(folder_path, num_images=5, img_size=640):
                 # Create a polygon patch
                 polygon = patches.Polygon(
                     coords,
-                    closed=True
+                    closed=True,
                     fill=False,            # Don't fill the polygon
                     edgecolor='red',
                     linewidth=2

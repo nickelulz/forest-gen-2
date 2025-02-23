@@ -153,6 +153,8 @@ def convert_to_coco_api(ds):
             ann = {}
             ann["image_id"] = image_id
             ann["bbox"] = bboxes[i]
+            if i >= len(labels):
+                print(f'err: {num_objs} objects, {len(labels)} labels: {bboxes}')
             ann["category_id"] = labels[i]
             categories.add(labels[i])
             ann["area"] = areas[i]
