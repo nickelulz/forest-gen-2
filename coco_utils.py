@@ -169,7 +169,13 @@ def convert_to_coco_api(ds):
             ann_id += 1
     dataset["categories"] = [{"id": i} for i in sorted(categories)]
     coco_ds.dataset = dataset
-    coco_ds.createIndex()
+
+    # suppress output
+    from contextlib import redirect_stdout
+    import io
+    with redirect_stdout(io.StringIO()):
+        coco_ds.createIndex()
+
     return coco_ds
 
 

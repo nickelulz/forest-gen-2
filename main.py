@@ -8,7 +8,7 @@ from PIL import Image
 
 from engine import train_one_epoch, evaluate
 from util import *
-from dataset import * 
+from dataset import *
 
 DATA_ROOT_DIR = './data/sanitized'
 MODEL_TEST_IMAGE_PATH = 'test/images/stand_1809.png'
@@ -26,7 +26,7 @@ def main() -> None:
                os.path.join(DATA_ROOT_DIR, MODEL_TEST_LABEL_PATH))
 
 def save_model(model, filename):
-    os.mkdirs('./bin', exist_ok=True)
+    os.makedirs('./bin', exist_ok=True)
     output_path = os.path.join('./bin', filename)
     torch.save(model.state_dict(), output_path)
 

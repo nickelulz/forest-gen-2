@@ -10,6 +10,8 @@ import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.transforms import v2 as T
 
+from contextlib import redirect_stdout
+
 def get_model_object_detection(num_classes):
     # Load a Faster R-CNN model pre-trained on COCO
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")

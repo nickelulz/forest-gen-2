@@ -1,0 +1,14 @@
+numpy
+scipy
+Pillow
+cython
+matplotlib
+scikit-image
+tensorflow
+keras
+pycocotools
+opencv-python
+h5py
+imgaug
+IPython[all]
+contextlib
