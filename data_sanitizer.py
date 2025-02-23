@@ -1,8 +1,8 @@
 import sys, os, shutil
 from pathlib import Path
 
-INPUT_DATA_FOLDER = './data/forest-original'
-OUTPUT_DATA_FOLDER = './data/forest'
+INPUT_DATA_FOLDER = './data/unsanitized'
+OUTPUT_DATA_FOLDER = './data/sanitized'
 
 IMAGE_SIZE = 640
 invalid_boxes = 0

@@ -36,8 +36,8 @@ def set_device():
         device = torch.device('cuda') 
     else: 
         device = torch.device('cpu')
-
     print(f'Using Device: {device}')
+    return device
 
 def visualize_bboxes(folder_path, num_images=5, img_size=640):
     """

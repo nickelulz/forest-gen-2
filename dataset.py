@@ -33,7 +33,7 @@ class ForestDataset(Dataset):
         
         image_id_matcher = re.search(r'\d+', image_path)
         image_id = int(image_id_matcher.group()) if image_id_matcher else index
-        print('ID is', image_id, image_path)
+        print(f'Reading {image_id}')
 
         with open(label_path, 'r') as f:
             lines = f.readlines()
@@ -50,14 +50,12 @@ class ForestDataset(Dataset):
                 areas.append(area)
 
             num_bboxes = len(bboxes)
-
             if num_bboxes == 0:
                 raise ValueError("No Bounding Boxes Returned") 
 
             bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
             labels = torch.as_tensor([1] * num_bboxes, dtype=torch.int64)
             is_crowd = torch.zeros((num_bboxes), dtype=torch.int64) 
-            image_id = torch.tensor(image_id, dtype=torch.int64) 
             areas = torch.as_tensor(areas, dtype=torch.float32)
 
             target = {
@@ -84,7 +82,7 @@ class DatasetLoaderWrapper:
     test:  DataLoader
     valid: DataLoader
 
-def load_dataset(dataset_root_path, limit=None) -> DataLoader:
+def load_dataset(dataset_root_path, limit = None, batch_size = 2) -> DataLoader:
     """
     Loads the dataset (and loader) from a path
     """
@@ -92,7 +90,7 @@ def load_dataset(dataset_root_path, limit=None) -> DataLoader:
         ForestDataset(os.path.join(dataset_root_path, 'train'), 
                       get_transform(train=True),
                       limit),
-        batch_size=2,
+        batch_size = batch_size,
         shuffle=True,
         collate_fn=utils.collate_fn
     )
@@ -101,7 +99,7 @@ def load_dataset(dataset_root_path, limit=None) -> DataLoader:
         ForestDataset(os.path.join(dataset_root_path, 'valid'), 
                       get_transform(train=False),
                       limit),
-        batch_size=1,
+        batch_size = batch_size,
         shuffle=True,
         collate_fn=utils.collate_fn
     )
@@ -110,7 +108,7 @@ def load_dataset(dataset_root_path, limit=None) -> DataLoader:
         ForestDataset(os.path.join(dataset_root_path, 'test'), 
                       get_transform(train=False),
                       limit),
-        batch_size=1,
+        batch_size = batch_size,
         shuffle=False,
         collate_fn=utils.collate_fn
     )
